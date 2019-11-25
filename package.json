@@ -1,5 +1,7 @@
 {
-    "private": true,
+    "name": "msllp_core",
+    "private": false,
+    "version": "5.8.1",
     "scripts": {
         "dev": "npm run development",
         "development": "cross-env NODE_ENV=development node_modules/webpack/bin/webpack.js --progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js",
@@ -27,5 +29,6 @@
     "dependencies": {
         "mobile-device-detect": "^0.2.3",
         "tailwindcss": "^1.1.1"
-    }
+    },
+    "publishConfig": { "registry": "https://npm.pkg.github.com/" }
 }
