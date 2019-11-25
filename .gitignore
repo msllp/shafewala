@@ -1,8 +1,7 @@
 /node_modules
-/public/
-/public/storage
+
 /storage/*.key
-/vendor
+*.exe
 /.idea
 .env
 .phpunit.result.cache
