@@ -12,7 +12,7 @@ yarn-error.log
 *.bat
 *.lock
 
-package-lock.json
+
 
 
 
