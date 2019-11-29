@@ -300,7 +300,7 @@ public function addAppUserFrom(){
                 $m->rowEdit(['UniqId' => $id], $fData);
             }
         }
-        $nextDat=\MS\Core\Helper\Comman::makeNextData('Core','Succegully added in our sysetem',route('MOD.User.Master.View.All'));
+        $nextDat=\MS\Core\Helper\Comman::makeNextData('Core','View All Root Users',route('MOD.User.Master.View.All'));
         return $m->jsonOut([true],$nextDat);
 
 
