@@ -42,7 +42,7 @@ getGetRaw(url,classFor,callBack){
 
             fetch(url)   .then(function(response) {
 
-                console.log(response);
+             //   console.log(response);
                 return response.json()
 
 

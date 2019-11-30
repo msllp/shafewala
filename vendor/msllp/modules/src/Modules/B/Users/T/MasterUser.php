@@ -67,7 +67,7 @@ return [
             ],
 
             'edit'=>[
-                "btnColor"=>"bg-blue-100",
+                "btnColor"=>"bg-blue-300",
                 "route"=>"MOD.User.Master.EditForm.Post",
                 "routePara"=>['id'=>'UniqId'],
                 "btnIcon"=>"fi flaticon-edit",
@@ -79,7 +79,7 @@ return [
             ],
 
             'delete'=>[
-                "btnColor"=>"bg-red-100",
+                "btnColor"=>"bg-red-300",
                 "route"=>"MOD.User.Master.Delete",
                 "routePara"=>['id'=>'UniqId'],
                 "btnIcon"=>"fi flaticon-bin",
@@ -87,7 +87,7 @@ return [
                 'msLinkKey'=>'UniqId',
                 'msLinkText'=>'MSUsername',
                 'doubleConfirm'=>'true',
-                'doubleConfirmText'=>'Are You Sure to remove Root User',
+                'doubleConfirmText'=>'Are you sure you want to remove Root User',
                 'ownTab'=>'true',
                 // 'msNextAction'=>'MOD.User.Master.View.All'
 
