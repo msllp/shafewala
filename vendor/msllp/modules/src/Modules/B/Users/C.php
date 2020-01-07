@@ -11,7 +11,7 @@ use MS\Core\Helper\Comman;
 use mysql_xdevapi\Exception;
 use Razorpay\Api;
 use function GuzzleHttp\Promise\all;
-
+use Socialite;
 class C extends BaseController
 {
     use  DispatchesJobs, ValidatesRequests;
@@ -22,148 +22,30 @@ class C extends BaseController
             'logo'=>"logo-a.png"
 
         ];
+    protected $ln='en';
 
-    public function MaintainaceDashboard(){
+    public function MaintainaceDashboard(Request $r,$ln=null){
 
-
+        if($ln==null)$ln=$this->ln;
+        $r->session()->put('ln', $ln);
+        session('ln',$ln);
+        \App::setlocale(session('ln'));
         return view("MS::core.layouts.MS.mpanel");
     }
 
 
     public function SideNavForMaintainaceDashboard(Request $r){
 
+        \App::setlocale(session('ln'));
+        //dd($r->session()->all());
         $rdata=['accessToken'=>'UserMitul'];
-        $data=[
-            [
-                'text'=>'Users',
-                'type'=>'mainNav',
-                'icon'=>'fi flaticon-user',
-                'sub' =>[
-
-                    [
-                        'type'=> 'title',
-                        'text'=> 'Manage Root User',
-                        'icon'=> 'fi flaticon-problem'
-                    ],
-                    [
-                        'type'=> 'link',
-                        'text'=> 'Add Root User',
-                        'link'=> route('MOD.User.Master.AddForm'),
-                        'icon'=>'fi flaticon-partner'
-                    ]
-
-                    ,
-
-                    [
-                        'type'=> 'link',
-                        'text'=> 'View All Root Users',
-                        'link'=> route('MOD.User.Master.View.All'),
-                        'icon'=>'fi flaticon-users-group'
-                    ],
-                    [
-                        'type'=> 'title',
-                        'text'=> 'Manage App User Roles',
-                        'icon'=> 'fas fa-cogs'
-                    ],
-
-                    [
-                        'type'=> 'link',
-                        'text'=> 'Add User Role',
-                        'link'=> route('MOD.User.Master.Roles.AddForm'),
-                        'icon'=>'fi flaticon-partner'
-                    ]
-
-                    ,
-
-                    [
-                        'type'=> 'link',
-                        'text'=> 'View All User Roles',
-                        'link'=> route('MOD.User.Master.Roles.View.All'),
-                        'icon'=>'fi flaticon-users-group'
-                    ],
-
-                    [
-                        'type'=> 'link',
-                        'text'=> 'Add App User',
-                        'link'=> route('MOD.User.AddForm'),
-                        'icon'=>'fi flaticon-add'
-                    ],
-
-                ],
-            ],
-
-
-            [
-                'text'=>'Modules',
-                'type'=>'mainNav',
-                'icon'=>'fi flaticon-distributed',
-                'sub' =>[
-
-                    [
-                        'type'=> 'title',
-                        'text'=> 'Manage Modules',
-                        'icon'=> 'fi flaticon-execution'
-                    ], [
-                        'type'=> 'link',
-                        'text'=> 'Add Module',
-                        'link'=> route('MOD.Mod.Master.AddForm'),
-                        'icon'=>'fi flaticon-add'
-                    ]
-                    ,[
-                        'type'=> 'link',
-                        'text'=> 'View All Modules',
-                        'link'=> route('MOD.Mod.Master.View.All'),
-                        'icon'=>'fi flaticon-plan'
-                    ],
-                    [
-                        'type'=> 'title',
-                        'text'=> 'Manage Routes',
-                        'icon'=> 'fi flaticon-execution'
-                    ],
-                    [
-                        'type'=> 'link',
-                        'text'=> 'Add Route',
-                        'link'=> route('MOD.Mod.Master.Route.AddForm'),
-                        'icon'=>'fi flaticon-add'
-                    ],
-                    [
-                        'type'=> 'link',
-                        'text'=> 'View All Routes',
-                        'link'=> route('MOD.Mod.Master.Route.View.All'),
-                        'icon'=>'fi flaticon-plan'
-                    ],
-
-                    [
-                        'type'=> 'title',
-                        'text'=> 'Manage Events',
-                        'icon'=> 'fi flaticon-commerce-and-shopping-1'
-                    ],
-
-                    [
-                        'type'=> 'link',
-                        'text'=> 'Add Event',
-                        'link'=> route('MOD.Mod.Master.Event.AddForm'),
-                        'icon'=>'fi flaticon-add'
-                    ],
-                    [
-                        'type'=> 'link',
-                        'text'=> 'View All Events',
-                        'link'=> route('MOD.Mod.Master.Event.View.All'),
-                        'icon'=>'fi flaticon-plan'
-                    ],
-
-
-
-                ],
-            ],
-
-
-        ];
+        $data=\MS\Mod\B\Mod\L\Nav::getNav();
         //dd(route('MOD.Mod.Master.Event.View.All'));
         return \MS\Core\Helper\Comman::proccessReqNGetSideNavDataForDashboard($r,$data, $rdata);
     }
 
-public function addAppUserFrom(){
+    ///Root User Start
+    public function addAppUserFrom(){
     $m=F::getAppUserModel();
     return $m->displayForm('add_app_user');
 }
@@ -171,7 +53,6 @@ public function addAppUserFrom(){
         $m=F::getRootUserModel();
         return $m->displayForm('add_user');
     }
-
     public function saveUser(Request $r){
         $m=F::getRootUserModel();
         $d1=$r->all();
@@ -200,8 +81,6 @@ public function addAppUserFrom(){
         return $m->processForSave($r,$d,$t,$n);
 
     }
-
-
     public function editUserFrom(Request $r,$id){
         $m=F::getRootUserModel();
 
@@ -216,7 +95,6 @@ public function addAppUserFrom(){
         }
         return $m->editForm('edit_user',$d);
     }
-
     public function updateUser(Request $r,$id){
         $m=F::getRootUserModel();
         $d=$r->all();
@@ -249,18 +127,18 @@ public function addAppUserFrom(){
      //   $m->migrate();
         return $m->viewData('view_all');
     }
-
     public function viewAllUserPagination(Request $r){
 
         $m=F::getRootUserModel();
         return $m->ForPagination($r);
     }
+    ///Root User End
 
+    ///User Role Start
     public function addUserRolesFrom(){
         $m=F::getUserTypeModel();
         return $m->editForm('add_user_type');
     }
-
     public function saveUserRoles(Request $r){
         $m=F::getUserTypeModel();
         $d1=$r->all();
@@ -276,6 +154,21 @@ public function addAppUserFrom(){
         F::makeRoles($r->all());
     }
 
+    public function editUserRolesFrom(Request $r,$id){
+        $m=F::getUserTypeModel();
+
+
+        $d1=$m->rowGet(['UniqId'=>$id]);
+        //   dd();
+
+        if(! (count($d1) >0)){
+            return $m->jsonOutError(['Oppes, User Role not found in my system.']);
+        }elseif (count($d1) ==1){
+            $d=$d1[0];
+        }
+        return $m->editForm('edit_user_type',$d);
+    }
+
     public function viewAllUserRoles(Request $r){
         $m=F::getUserTypeModel();
         //   $m->migrate();
@@ -286,7 +179,7 @@ public function addAppUserFrom(){
         $m=F::getUserTypeModel();
         return $m->ForPagination($r);
     }
-
+    ///User Role End
     public function  saveAppUser(Request $r){
 
         $m=F::getAppUserModel();
@@ -304,7 +197,38 @@ public function addAppUserFrom(){
 
     }
 
+    public function loginForRootUser(Request $r){
 
+        $m=F::getRootUserModel();
+    //    dd($m);
+        return $m->loginPage();
+
+    }
+
+    public function loginForRootUserFromOthers(){
+     //   config()->set('services.test',[]);
+        \MS\Mod\B\Users\L\OutLoginApi::checkOaAuthisOk();
+   //     dd(config());
+          return Socialite::driver('google')->redirect();
+    }
+
+
+    public function loginForRootUserFromOtherCallback(Request $r){
+
+        $user = Socialite::driver('google')->user();
+
+        dd($user);
+    }
+
+    public function cTest(Request $r){
+       dd(\MS\Mod\B\Mod\L\Nav::getNav());
+        dd(\MS\Mod\B\Purchase\L\Products::getProductTableRaw());
+        dd(\MS\Mod\B\Sales\L\Products::getProductTableRaw());
+        $m1=\MS\Core\Helper\MSTableSchema::getTableDataForTable('Mod');
+        $m=new \MS\Core\Helper\MSDB(__NAMESPACE__,'Mod_MasterCoreTable');
+     // dd($m->mod_Tables);
+        dd($m->attachTableData($m1));
+    }
 
 
 

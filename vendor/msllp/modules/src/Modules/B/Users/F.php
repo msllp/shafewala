@@ -56,7 +56,9 @@ public static function getAppUserModel(){
 public static function getUserRolePermission($RoleId='JwpWQp'){
     return new \MS\Core\Helper\MSDB(__NAMESPACE__,'User_User_Type_sub',[$RoleId]);
 }
-
+public static function getUserSourceModel(){
+        return new \MS\Core\Helper\MSDB(__NAMESPACE__,'Master_User_VerifyBy');
+    }
 
 
 
@@ -109,11 +111,15 @@ public static function getUser($data){
 
 
     }
-public static function getCurrentUser($data){
-
-
-
+public static function getCurrentUser(){
+    $sA=session()->all();
+    if(!array_key_exists('CurrentMSUser',$sA) && true)$sA['CurrentMSUser']='001';//TODO:Remove in Production
+    if(array_key_exists('CurrentMSUser',$sA))$user=new L\User($sA['CurrentMSUser']);
+    if(!isset($user))return [] ;
+    return $user->getUserData();
     }
+
+
 public static function checkCurrentOkForUser($data){}
 public static function upgradeUser($id){}
 

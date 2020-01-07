@@ -20,7 +20,15 @@ class MSDB implements MasterNoSql
 {
 
 
-    public $model,$database,$masterNamespace,$e,$fTableName,$connection,$CurrentError;
+    public $model,$database,$masterNamespace,$e,$fTableName,$connection,$CurrentError,$MSmodel,$mod_Tables;
+
+    /**
+     * @return mixed
+     */
+    public function getModel()
+    {
+        return $this->MSmodel;
+    }
 public $dataToProcess=[];
     public $currentFiles=[];
     public $ms_id="0";
@@ -29,34 +37,43 @@ public $dataToProcess=[];
 
     private $filePaths=[];
 
-    public function attachR($r){
-        $this->r=$r;
+    public function attachTableData($tableData){
+    //    dd($tableData);
+
+        if(is_array($this->mod_Tables) && array_key_exists($this->ms_id,$this->mod_Tables) && array_key_exists($this->ms_id,$tableData)){
+
+            $this->mod_Tables[$this->ms_id]=$tableData[$this->ms_id];
+            $this->model = new $this->database['namespace'] ( $this->masterNamespace, $this->ms_id,[],$tableData[$this->ms_id]);
+
+
+            $connection=$this->model->getConnectionName();
+            $tableName=$this->model->getTable();
+            $this->fTableName=$tableName;
+            $this->connection=$connection;
+            $this->MSmodel =\DB::connection($connection)->table($tableName);
+
+        }
+
+    // dd($this);
         return $this;
     }
-    public function __construct(string $nameSpace, string $id=null, array $perFix=[])
+
+
+    public function __construct(string $nameSpace, string $id=null, array $perFix=[],array $tableData=[])
     {
 
         $nameSpace=$nameSpace;
             $base=$nameSpace."\B";
         $this->masterNamespace= $nameSpace;
-        if($id==null)$id=$this->ms_id;
-
 
         $this->ms_id=$id;
         $this->database=[
             'namespace'=>"\\".$nameSpace."\\M",
             'id'=>$id,
-
-            //'perfix'=>implode('_',$perFix),
-        ];
+             ];
 
 
         if(count($perFix)>0 )$this->database['perfix']=$perFix;
-        //if()
-
-
-
-
 
         if(array_key_exists('perfix',$this->database)) {
             $this->model = new $this->database['namespace'] ($nameSpace, $id, $this->database['perfix']);
@@ -66,8 +83,9 @@ public $dataToProcess=[];
 
 
         //parent::__construct($nameSpace, $id, $perFix);
-        $this->mod_Tables[$this->ms_id]=$this->model->ms_base::getTableArray($this->ms_id);
 
+       $this->mod_Tables[$this->ms_id]=$this->model->ms_base::getTableArray($this->ms_id,$tableData);
+     //   if(!is_array($this->mod_Tables))dd($this->mod_Tables);
 
         $connection=$this->model->getConnectionName();
         $tableName=$this->model->getTable();
@@ -76,11 +94,17 @@ public $dataToProcess=[];
         $this->MSmodel =\DB::connection($connection)->table($tableName);
     }
 
+
     private static $dbStore=['MS','DB','Master' ];
 
     private static $dbSource=['MS','DB','Master','blank','blank' ];
 
     public $perPage=5;
+
+    public function attachR($r){
+        $this->r=$r;
+        return $this;
+    }
 
     /**
      * Static Raw drop Table Function
@@ -730,7 +754,7 @@ public $dataToProcess=[];
         return $f->fromModel($this)->view();
     }
 
-      public function displayForm($formId=null,$data=[]){
+    public function displayForm($formId=null,$data=[]){
 
         if($formId != null){
             $f=new \MS\Core\Helper\MSForm($this->masterNamespace,$this->database['id'],null,['formID'=>$formId]);
@@ -740,6 +764,15 @@ public $dataToProcess=[];
 
 
        return $f->fromModel($this)->view();
+    }
+
+    public function getDisplayFormArray($formId=null,$data=[]){
+        if($formId != null){
+            $f=new \MS\Core\Helper\MSForm($this->masterNamespace,$this->database['id'],null,['formID'=>$formId]);
+        }else{
+            $f=new \MS\Core\Helper\MSForm($this->masterNamespace,$this->database['id']);
+        }
+        return $f->fromModel($this)->viewRaw();
     }
 
     public function viewData($viewId=null){
@@ -1028,10 +1061,10 @@ public $dataToProcess=[];
     }
 
 
-    public function jsonOutError($e=[]){
+    public function jsonOutError($e=[],$errcode=418){
         return response()->json([
                 'errorsRaw' => implode(' , ',$e),
-            ],418);
+            ],$errcode);
     }
 
     public function processForSave($r,$d=[],$tasks=[],$nextData=[]){
@@ -1070,5 +1103,22 @@ public $dataToProcess=[];
 
     }
 
+    public function loginPage($Id=null){
+        //TODO: Complete this for login page
+        $tableArray=$this->mod_Tables[$this->ms_id];
+        ($Id == null  && array_key_exists('MSLogin',$tableArray) )?$LoginId= array_key_first ($tableArray['MSLogin']):$LoginId=$Id;
+
+
+
+        if( array_key_exists('MSLogin',$tableArray)  && array_key_exists($LoginId,$tableArray['MSLogin'])){
+            $lData=$tableArray['MSLogin'][$LoginId];
+        }else{
+       // dd($this);
+           return $this->jsonOutError(['No Login Page Found'],404);
+        }
+
+        $loginPage=new MSLogin($this,$lData);
+        return $loginPage->displayLoginPageFromMSDB();
+    }
 
 }

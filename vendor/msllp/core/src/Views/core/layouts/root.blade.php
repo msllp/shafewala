@@ -9,7 +9,7 @@
 	<meta charset="utf-8"/>
 	<title>MS Frame</title>
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta content="width=device-width,height=device-height,, initial-scale=1" name="viewport"/>
+	<meta content="width=device-width,height=device-height,initial-scale=1, shrink-to-fit=no,maximum-scale=1.0, user-scalable=0" name="viewport"/>
 	<meta content="" name="description"/>
 	<meta content="Million Solutions LLP" name="author"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -19,12 +19,20 @@
     <meta name="theme-color" content="#db5945">
 
 
+    <link rel="apple-touch-icon" sizes="180x180" href="{{asset('images/ico/apple-touch-icon.png')}}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{asset('images/ico/favicon-32x32.png')}}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{asset('images/ico/favicon-16x16.png')}}">
+    <link rel="manifest" href="{{asset('images/ico//site.webmanifest')}}">
+
 </head>
-<body class="min-vh-100" >
+<body class="min-vh-100"  >
 
 
-<div id="msapp">
+<div id="msapp"  >
 @yield('body')
+    <transition name="slide"  mode="out-in">
+    <mscalc v-if="msCalc"></mscalc>
+    </transition>
 </div>
     <script src="{{ asset("b/js/app.js") }}?{{\MS\Core\Helper\Comman::random(10)}}" type="text/javascript" defer></script>
 
